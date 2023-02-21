@@ -9,12 +9,13 @@ const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 //inicializamos y configuramos el rtc
 virtuabotixRTC myRTC(11, 12, 13);
-int seconds = 0, minutes = 50, hours = 9, day_of_the_week = 1, day_of_the_month = 20, month = 2, year = 2023;
 int limpiador = 1;
 int boton_lcd;
 int boton_sin_oprimir = 1023, up = 130, down = 306, left = 480, right = 0, select = 721;
 int partes = 1;
 int primerAlimentoh = 0,segundoAlimentoh = 0, primerAlimentom = 0,segundoAlimentom = 0;
+
+#define primeraVez 0
 
 struct Horario_Dispensado{
   //estructura usada para guardar las horas en que dispensa y el tiempo que dispensa
@@ -67,6 +68,30 @@ void leer_eeprom(){
   Dispensado = x;
 }
 
+void descargando_comida(){
+  
+  if(Dispensado.horasAl == myRTC.hours and Dispensado.minutosAl == myRTC.minutes and myRTC.seconds == 0){
+    lcd.clear();
+    lcd.setCursor(2,0);
+    lcd.print("Descargando");
+    lcd.setCursor(5,1);
+    lcd.print("comida");
+    digitalWrite(A1,1);
+    delay(10000);
+    digitalWrite(A1,0);
+    
+  } if(Dispensado.horasAl2 == myRTC.hours and Dispensado.minutosAl2 == myRTC.minutes and myRTC.seconds == 0){
+    lcd.clear();
+    lcd.setCursor(2,0);
+    lcd.print("Descargando");
+    lcd.setCursor(5,1);
+    lcd.print("comida");
+    digitalWrite(A1,1);
+    delay(10000);
+    digitalWrite(A1,0);
+    
+  }
+}
 
 
 void setup() {
@@ -77,7 +102,10 @@ void setup() {
   //esta funcion hace que apenas inicie el arduino lea la memoria eeprom y la guarde en Dispensado
    leer_eeprom();
    
-
+#if primeraVez
+ int seconds = 0, minutes = 21, hours = 11, day_of_the_week = 2, day_of_the_month = 21, month = 2, year = 2023;
+ myRTC.setDS1302Time(seconds, minutes, hours, day_of_the_week, day_of_the_month, month, year);
+ #endif
   
    
 
@@ -89,9 +117,10 @@ void setup() {
 
 //variables y objetos definidos para que el timer funcione correctamente
 
-bool animation= 0;
+bool animation = 0;
+bool descarga = 0;
 Timer TiempoAnimacion;
-
+Timer TiempoAnimacionDescarga;
 
  
 void loop() {
@@ -150,6 +179,7 @@ void loop() {
    
     }
     
+     descargando_comida();
    
     
   break;
@@ -218,7 +248,8 @@ if(limpiador == 1){
     guardar_eeprom();
     delay(200);
   }
- 
+
+   descargando_comida();
 
   
   break;
@@ -297,6 +328,8 @@ if(limpiador == 1){
     guardar_eeprom();
     delay(200);
   }
+
+   descargando_comida();
   
   break;
   case 4:
@@ -369,7 +402,9 @@ if(Dispensado.horasAl2 < 10){
     guardar_eeprom();
     delay(200);
   }
-  
+
+   descargando_comida();
+   
   break;
   
   case 5:
@@ -426,7 +461,7 @@ if(Dispensado.horasAl2 < 10){
     delay(200);
   }
   if(Dispensado.minutosAl2 >= 60 and Dispensado.minutosAl2 <= 62 ){
-    Dispensado.horasAl ++;
+    Dispensado.horasAl2 ++;
     Dispensado.minutosAl2 = 0;
   }
   if(Dispensado.minutosAl2 > 62){
@@ -444,49 +479,54 @@ if(Dispensado.horasAl2 < 10){
     guardar_eeprom();
     delay(200);
   }
+
+   descargando_comida();
   
   break;
   
   case 6:
-  lcd.clear();
-  lcd.setCursor(2,0);
-  lcd.print("Ok en proceso");
-  delay(2000);
-  lcd.clear();
-  lcd.setCursor(5,0);
-  lcd.print(myRTC.hours);
-  lcd.setCursor(7,0);
-  lcd.print(":");
-  lcd.setCursor(8,0);
-  lcd.print(myRTC.minutes);
-  delay(10000);
- 
+    TiempoAnimacionDescarga.umbral = 5000;
+    while(!descarga and !TiempoAnimacionDescarga.is_the_time()){      
+      lcd.clear();
+      lcd.setCursor(2,0);
+      lcd.print("Ok en proceso");
+      delay(100);
+      descargando_comida();
+    }
+    descarga = 1;
+    TiempoAnimacionDescarga.umbral = 5000;
+    
+    while(descarga and !TiempoAnimacionDescarga.is_the_time()){
+      myRTC.updateTime();
+      lcd.clear();
+      lcd.setCursor(5,0);
+      lcd.print(myRTC.hours);
+      lcd.setCursor(7,0);
+      lcd.print(":");
+      lcd.setCursor(8,0);
+      lcd.print(myRTC.minutes);
+      lcd.setCursor(10,0);
+      lcd.print(":");
+      lcd.setCursor(11,0);
+      lcd.print(myRTC.seconds);
+      delay(100);
+      descargando_comida();
+   }
+    descarga = 0;
 
-  if(Dispensado.horasAl == myRTC.hours and Dispensado.minutosAl == myRTC.minutes and myRTC.seconds == 0){
-    lcd.clear();
-    lcd.setCursor(2,0);
-    lcd.print("Descargando");
-    lcd.setCursor(5,1);
-    lcd.print("comida");
-    digitalWrite(A1,0);
-    delay(5000);
-    digitalWrite(A1,1);
+
     
-  } if(Dispensado.horasAl2 == myRTC.hours and Dispensado.minutosAl2 == myRTC.minutes and myRTC.seconds == 0 ){
-    lcd.clear();
-    lcd.setCursor(2,0);
-    lcd.print("Descargando");
-    lcd.setCursor(5,1);
-    lcd.print("comida");
-    digitalWrite(A1,0);
-    delay(5000);
-    digitalWrite(A1,1);
     
-  }
- 
-  break;
+    
+  
+
+
+    descargando_comida();
   
  
+    break;
+  
  
- }
+  } 
+
 }
