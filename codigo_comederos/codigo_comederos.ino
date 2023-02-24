@@ -13,9 +13,8 @@ int limpiador = 0;
 int boton_lcd;
 int boton_sin_oprimir = 1023, up = 130, down = 306, left = 480, right = 0, select = 721;
 int partes = 1;
-int primerAlimentoh = 0,segundoAlimentoh = 0, primerAlimentom = 0,segundoAlimentom = 0;
-unsigned int horas_act = 0, minutos_act = 0;
-String act_horas, act_minutos;
+unsigned int dia_act = 24, mes_act = 2, year_act = 2023,horas_act = 0, minutos_act = 0;
+String act_dia, act_mes, act_year, act_horas, act_minutos;
 String alHoras, alMinutos, al2Horas, al2Minutos;
 
 #define primeraVez 0
@@ -106,7 +105,7 @@ void setup() {
    leer_eeprom();
    
 #if primeraVez
- int seconds = 0, minutes = 19, hours = 11, day_of_the_week = 5, day_of_the_month = 24, month = 2, year = 2023;
+ int seconds = 0, minutes = 28, hours = 12, day_of_the_week = 5, day_of_the_month = 24, month = 2, year = 2023;
  myRTC.setDS1302Time(seconds, minutes, hours, day_of_the_week, day_of_the_month, month, year);
  #endif
   
@@ -179,13 +178,13 @@ void loop() {
     }
  
     if(boton_lcd == select){
-        partes +=3;
+        partes +=6;
         limpiador ++;
-        delay(100);
+        delay(200);
     }
     if(boton_lcd == up){
         partes ++;
-        delay(100);
+        delay(200);
     }
    
     
@@ -197,37 +196,46 @@ void loop() {
       lcd.clear();
       limpiador ++;
    }
-    
-     horas_act < 10? act_horas = "0" + String(horas_act) + ":" : act_horas = String(horas_act) + ":";
-     minutos_act < 10? act_minutos = "0" + String(minutos_act) : act_minutos = String(minutos_act);
+     dia_act < 10? act_dia = "0" + String(dia_act) + "/" : act_dia = String(dia_act) + "/";
+     mes_act < 10? act_mes = "0" + String(mes_act) + "/" : act_mes = String(mes_act) + "/";
+     year_act < 10? act_year = "0" + String(year_act): act_year = String(year_act);
+     horas_act < 10? act_horas = "|0" + String(horas_act) + ":" : act_horas = "|" + String(horas_act) + ":";
+     minutos_act < 10? act_minutos = "0" + String(minutos_act) + "|" : act_minutos = String(minutos_act) + "|";
+     
+     lcd.setCursor(2,0);
+     lcd.print(act_dia);
      lcd.setCursor(5,0);
-     lcd.print(act_horas);
+     lcd.print(act_mes);
      lcd.setCursor(8,0);
+     lcd.print(act_year);
+     lcd.setCursor(4,1);
+     lcd.print(act_horas);
+     lcd.setCursor(8,1);
      lcd.print(act_minutos);
 
      if(boton_lcd == up){
-        horas_act ++;
-        delay(100);
+        dia_act ++;
+        delay(200);
      }
      if(boton_lcd == down){
-        horas_act --;
-        delay(100);  
+        dia_act --;
+        delay(200);  
      }
      if(boton_lcd == right){
         partes ++;
-        delay(100);
+        delay(200);
      }
   
 
 
      if(boton_lcd == select){
-        //myRTC.setDS1302Time(0, minutos_act, horas_act, day_of_the_week, day_of_the_month, month, year);
-        partes +=2;
+        myRTC.setDS1302Time(0, minutos_act, horas_act, 0, dia_act, mes_act, year_act);
+        partes +=5;
         delay(200);
      }
           
-     if(horas_act > 23){
-        horas_act = 0;
+     if(dia_act > 31){
+        dia_act = 0;
      }
   
           
@@ -235,42 +243,206 @@ void loop() {
 
   case 3:
 
-    horas_act < 10? act_horas = "0" + String(horas_act) + ":" : act_horas = String(horas_act) + ":";
-    minutos_act < 10? act_minutos = "0" + String(minutos_act) : act_minutos = String(minutos_act);
-        
-    lcd.setCursor(5,0);
-    lcd.print(act_horas);
-    lcd.setCursor(8,0);
-    lcd.print(act_minutos);
+     dia_act < 10? act_dia = "0" + String(dia_act) + "/" : act_dia = String(dia_act) + "/";
+     mes_act < 10? act_mes = "0" + String(mes_act) + "/" : act_mes = String(mes_act) + "/";
+     year_act < 10? act_year = "0" + String(year_act): act_year = String(year_act);
+     horas_act < 10? act_horas = "|0" + String(horas_act) + ":" : act_horas = "|" + String(horas_act) + ":";
+     minutos_act < 10? act_minutos = "0" + String(minutos_act) + "|" : act_minutos = String(minutos_act) + "|";
+     
+     lcd.setCursor(2,0);
+     lcd.print(act_dia);
+     lcd.setCursor(5,0);
+     lcd.print(act_mes);
+     lcd.setCursor(8,0);
+     lcd.print(act_year);
+     lcd.setCursor(4,1);
+     lcd.print(act_horas);
+     lcd.setCursor(8,1);
+     lcd.print(act_minutos);
 
-    if(boton_lcd == up){
+     if(boton_lcd == up){
+        mes_act ++;
+        delay(200);
+     }
+     if(boton_lcd == down){
+        mes_act --;
+        delay(200);  
+     }
+     if(boton_lcd == right){
+        partes ++;
+        delay(200);
+     }
+     if(boton_lcd == left){
+        partes --;
+        delay(200);
+     }
+
+
+     if(boton_lcd == select){
+        myRTC.setDS1302Time(0, minutos_act, horas_act, 0, dia_act, mes_act, year_act);
+        partes +=4;
+        delay(200);
+     }
+          
+     if(mes_act > 13){
+        mes_act = 0;
+     }        
+       
+
+  break;
+
+   case 4:
+
+     dia_act < 10? act_dia = "0" + String(dia_act) + "/" : act_dia = String(dia_act) + "/";
+     mes_act < 10? act_mes = "0" + String(mes_act) + "/" : act_mes = String(mes_act) + "/";
+     year_act < 10? act_year = "0" + String(year_act): act_year = String(year_act);
+     horas_act < 10? act_horas = "|0" + String(horas_act) + ":" : act_horas = "|" + String(horas_act) + ":";
+     minutos_act < 10? act_minutos = "0" + String(minutos_act) + "|" : act_minutos = String(minutos_act) + "|";
+     
+     lcd.setCursor(2,0);
+     lcd.print(act_dia);
+     lcd.setCursor(5,0);
+     lcd.print(act_mes);
+     lcd.setCursor(8,0);
+     lcd.print(act_year);
+     lcd.setCursor(4,1);
+     lcd.print(act_horas);
+     lcd.setCursor(8,1);
+     lcd.print(act_minutos);
+
+     if(boton_lcd == up){
+        year_act ++;
+        delay(200);
+     }
+     if(boton_lcd == down){
+        year_act --;
+        delay(200);  
+     }
+     if(boton_lcd == right){
+        partes ++;
+        delay(200);
+     }
+     if(boton_lcd == left){
+        partes --;
+        delay(200);
+     }
+     
+     if(boton_lcd == select){
+        myRTC.setDS1302Time(0, minutos_act, horas_act, 0, dia_act, mes_act, year_act);
+        partes +=3;
+        delay(200);
+     }
+          
+     if(year_act == 65535){
+        year_act = 0;
+     }        
+       
+
+  break;
+
+   case 5:
+
+     dia_act < 10? act_dia = "0" + String(dia_act) + "/" : act_dia = String(dia_act) + "/";
+     mes_act < 10? act_mes = "0" + String(mes_act) + "/" : act_mes = String(mes_act) + "/";
+     year_act < 10? act_year = "0" + String(year_act): act_year = String(year_act);
+     horas_act < 10? act_horas = "|0" + String(horas_act) + ":" : act_horas = "|" + String(horas_act) + ":";
+     minutos_act < 10? act_minutos = "0" + String(minutos_act) + "|" : act_minutos = String(minutos_act) + "|";
+     
+     lcd.setCursor(2,0);
+     lcd.print(act_dia);
+     lcd.setCursor(5,0);
+     lcd.print(act_mes);
+     lcd.setCursor(8,0);
+     lcd.print(act_year);
+     lcd.setCursor(4,1);
+     lcd.print(act_horas);
+     lcd.setCursor(8,1);
+     lcd.print(act_minutos);
+
+     if(boton_lcd == up){
+        horas_act ++;
+        delay(200);
+     }
+     if(boton_lcd == down){
+        horas_act --;
+        delay(200);  
+     }
+     if(boton_lcd == right){
+        partes ++;
+        delay(200);
+     }
+     if(boton_lcd == left){
+        partes --;
+        delay(200);
+     }
+
+
+     if(boton_lcd == select){
+        myRTC.setDS1302Time(0, minutos_act, horas_act, 0, dia_act, mes_act, year_act);
+        partes +=2;
+        delay(200);
+     }
+          
+     if(horas_act == 24){
+        horas_act = 0;
+     }        
+       
+
+  break;
+
+  case 6:
+
+     dia_act < 10? act_dia = "0" + String(dia_act) + "/" : act_dia = String(dia_act) + "/";
+     mes_act < 10? act_mes = "0" + String(mes_act) + "/" : act_mes = String(mes_act) + "/";
+     year_act < 10? act_year = "0" + String(year_act): act_year = String(year_act);
+     horas_act < 10? act_horas = "|0" + String(horas_act) + ":" : act_horas = "|" + String(horas_act) + ":";
+     minutos_act < 10? act_minutos = "0" + String(minutos_act) + "|" : act_minutos = String(minutos_act) + "|";
+     
+     lcd.setCursor(2,0);
+     lcd.print(act_dia);
+     lcd.setCursor(5,0);
+     lcd.print(act_mes);
+     lcd.setCursor(8,0);
+     lcd.print(act_year);
+     lcd.setCursor(4,1);
+     lcd.print(act_horas);
+     lcd.setCursor(8,1);
+     lcd.print(act_minutos);
+
+     if(boton_lcd == up){
         minutos_act ++;
-        delay(100);
-    }
-    if(boton_lcd == down){
+        delay(200);
+     }
+     if(boton_lcd == down){
         minutos_act --;
-        delay(100);  
-    }
-    if(minutos_act > 59){
+        delay(200);  
+     }
+     if(boton_lcd == right){
+        partes ++;
+        delay(200);
+     }
+     if(boton_lcd == left){
+        partes --;
+        delay(200);
+     }
+  
+
+
+     if(boton_lcd == select){
+        myRTC.setDS1302Time(0, minutos_act, horas_act, 0, dia_act, mes_act, year_act);
+        partes ++;
+        delay(200);
+     }
+          
+     if(minutos_act >= 60){
         minutos_act = 0;
         horas_act ++;
-    }
-    if(boton_lcd == left){
-        partes --;
-        delay(100);
-    }
-    if(boton_lcd == select){
-       //myRTC.setDS1302Time(0, minutos_act, horas_act, day_of_the_week, day_of_the_month, month, year);
-        partes ++;
-        delay(200);    
-    }
-
-        
+     }        
        
 
   break;
       
-  case 4:
+  case 7:
   //el cuarto caso se utliza para seleccionar la hora en la que quiere que salga la primera parte del alimento del dia, este caso se divide en dos partes uno para la hora y el otro para los minutos
     if(limpiador == 1){
         lcd.clear();
@@ -317,7 +489,7 @@ void loop() {
   break;
   
  
-  case 5:
+  case 8:
   //esta es la segunda parte del caso anterior para poder cambiar los minutos
 
     if(limpiador == 2){
@@ -368,7 +540,7 @@ void loop() {
   
   break;
 
-  case 6:
+  case 9:
   //este caso es usado para poner la hora de la caida del segundo alimento, al igual que las otras sera divida en dos partes una para las horas y la otra para los minutos
 
     if(limpiador == 3){
@@ -414,7 +586,7 @@ void loop() {
    
   break;
   
-  case 7:
+  case 10:
    //esta es la segunda parte del anterior caso para los minutos
  
     if(limpiador == 4){
@@ -465,7 +637,7 @@ void loop() {
   
   break;
   
-  case 8:
+  case 11:
   
     TiempoAnimacionDescarga.umbral = 5000;
     while(!descarga and !TiempoAnimacionDescarga.is_the_time()){      
